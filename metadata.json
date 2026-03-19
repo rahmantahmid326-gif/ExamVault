@@ -1,0 +1,5 @@
+{
+  "name": "ExamVault",
+  "description": "Centralized repository of past exam papers, syllabuses, and study resources for IIUC students.",
+  "requestFramePermissions": []
+}

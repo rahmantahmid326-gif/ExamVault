@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Georgia", serif;
+  --font-sans: "Inter", sans-serif;
+  
+  --color-primary: #1D9E75;
+  --color-primary-dark: #085041;
+  --color-primary-light: #E1F5EE;
+  --color-bg-page: #F5F5F2;
+  --color-border-subtle: rgba(0, 0, 0, 0.1);
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-bg-page text-[#1a1a1a] antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+.card-shadow {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.border-subtle {
+  @apply border-[0.5px] border-black/10;
+}

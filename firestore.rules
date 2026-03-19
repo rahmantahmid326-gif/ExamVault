@@ -1,0 +1,154 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: faculties
+// Fields:
+//   - name: string (required)
+//
+// Collection: departments
+// Fields:
+//   - name: string (required)
+//   - facultyId: string (required)
+//
+// Collection: courses
+// Fields:
+//   - code: string (required)
+//   - name: string (required)
+//   - creditHours: number (required)
+//   - semester: number (required)
+//   - departmentId: string (required)
+//   - prerequisites: string (optional)
+//
+// Collection: question_papers
+// Fields:
+//   - courseId: string (required)
+//   - examType: string (required, 'Midterm' | 'Final')
+//   - season: string (required, 'Spring' | 'Autumn')
+//   - year: number (required)
+//   - fileUrl: string (required)
+//   - status: string (required, 'pending' | 'approved' | 'rejected')
+//   - submittedBy: string (required, UID)
+//   - createdAt: timestamp (required)
+//
+// Collection: syllabuses
+// Fields:
+//   - courseId: string (required)
+//   - fileUrl: string (required)
+//   - status: string (required, 'pending' | 'approved' | 'rejected')
+//   - submittedBy: string (required, UID)
+//   - createdAt: timestamp (required)
+//
+// Collection: resources
+// Fields:
+//   - courseId: string (required)
+//   - title: string (required)
+//   - type: string (required, 'Book' | 'Notes' | 'Slides')
+//   - fileUrl: string (required)
+//   - status: string (required, 'pending' | 'approved' | 'rejected')
+//   - submittedBy: string (required, UID)
+//   - createdAt: timestamp (required)
+//
+// Collection: users
+// Fields:
+//   - email: string (required)
+//   - role: string (required, 'student' | 'moderator' | 'admin')
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "rahmantahmid326@gmail.com" && request.auth.token.email_verified == true));
+    }
+    
+    function isModerator() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['moderator', 'admin']);
+    }
+    
+    function isValidStatus(status) {
+      return status in ['pending', 'approved', 'rejected'];
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    // Faculties, Departments, Courses: Publicly readable, Admin writable
+    match /faculties/{facultyId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /departments/{deptId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /courses/{courseId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Question Papers, Syllabuses, Resources
+    match /question_papers/{id} {
+      allow read: if resource.data.status == 'approved' || isModerator() || isOwner(resource.data.submittedBy);
+      allow create: if isAuthenticated() && 
+        request.resource.data.status == 'pending' &&
+        request.resource.data.submittedBy == request.auth.uid &&
+        request.resource.data.createdAt == request.time;
+      allow update: if isModerator() || (isOwner(resource.data.submittedBy) && request.resource.data.status == 'pending');
+      allow delete: if isAdmin();
+    }
+    
+    match /syllabuses/{id} {
+      allow read: if resource.data.status == 'approved' || isModerator() || isOwner(resource.data.submittedBy);
+      allow create: if isAuthenticated() && 
+        request.resource.data.status == 'pending' &&
+        request.resource.data.submittedBy == request.auth.uid &&
+        request.resource.data.createdAt == request.time;
+      allow update: if isModerator() || (isOwner(resource.data.submittedBy) && request.resource.data.status == 'pending');
+      allow delete: if isAdmin();
+    }
+    
+    match /resources/{id} {
+      allow read: if resource.data.status == 'approved' || isModerator() || isOwner(resource.data.submittedBy);
+      allow create: if isAuthenticated() && 
+        request.resource.data.status == 'pending' &&
+        request.resource.data.submittedBy == request.auth.uid &&
+        request.resource.data.createdAt == request.time;
+      allow update: if isModerator() || (isOwner(resource.data.submittedBy) && request.resource.data.status == 'pending');
+      allow delete: if isAdmin();
+    }
+
+    // Users
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) && 
+        (request.resource.data.role == 'student' || 
+         (request.resource.data.email == "rahmantahmid326@gmail.com" && request.resource.data.role == 'admin'));
+      allow update: if isAdmin();
+    }
+  }
+}

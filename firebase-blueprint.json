@@ -1,0 +1,100 @@
+{
+  "entities": {
+    "Faculty": {
+      "title": "Faculty",
+      "description": "An academic faculty within the university.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "The name of the faculty." }
+      },
+      "required": ["name"]
+    },
+    "Department": {
+      "title": "Department",
+      "description": "An academic department within a faculty.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "The name of the department." },
+        "facultyId": { "type": "string", "description": "The ID of the faculty it belongs to." }
+      },
+      "required": ["name", "facultyId"]
+    },
+    "Course": {
+      "title": "Course",
+      "description": "A specific course offered by a department.",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string", "description": "The course code (e.g., CSE101)." },
+        "name": { "type": "string", "description": "The name of the course." },
+        "creditHours": { "type": "number", "description": "The credit hours for the course." },
+        "semester": { "type": "number", "description": "The semester it belongs to (1-8)." },
+        "departmentId": { "type": "string", "description": "The ID of the department it belongs to." },
+        "prerequisites": { "type": "string", "description": "Prerequisites for the course." }
+      },
+      "required": ["code", "name", "creditHours", "semester", "departmentId"]
+    },
+    "QuestionPaper": {
+      "title": "Question Paper",
+      "description": "A past exam paper.",
+      "type": "object",
+      "properties": {
+        "courseId": { "type": "string", "description": "The ID of the course." },
+        "examType": { "type": "string", "enum": ["Midterm", "Final"], "description": "The type of exam." },
+        "season": { "type": "string", "enum": ["Spring", "Autumn"], "description": "The exam season." },
+        "year": { "type": "number", "description": "The year of the exam." },
+        "fileUrl": { "type": "string", "description": "The URL of the uploaded file." },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"], "description": "The moderation status." },
+        "submittedBy": { "type": "string", "description": "The UID of the user who submitted it." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "The submission time." }
+      },
+      "required": ["courseId", "examType", "season", "year", "fileUrl", "status", "submittedBy", "createdAt"]
+    },
+    "Syllabus": {
+      "title": "Syllabus",
+      "description": "A course syllabus.",
+      "type": "object",
+      "properties": {
+        "courseId": { "type": "string", "description": "The ID of the course." },
+        "fileUrl": { "type": "string", "description": "The URL of the uploaded file." },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"], "description": "The moderation status." },
+        "submittedBy": { "type": "string", "description": "The UID of the user who submitted it." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "The submission time." }
+      },
+      "required": ["courseId", "fileUrl", "status", "submittedBy", "createdAt"]
+    },
+    "Resource": {
+      "title": "Resource",
+      "description": "A study resource (notes, slides, books).",
+      "type": "object",
+      "properties": {
+        "courseId": { "type": "string", "description": "The ID of the course." },
+        "title": { "type": "string", "description": "The title of the resource." },
+        "type": { "type": "string", "enum": ["Book", "Notes", "Slides"], "description": "The type of resource." },
+        "fileUrl": { "type": "string", "description": "The URL of the uploaded file." },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"], "description": "The moderation status." },
+        "submittedBy": { "type": "string", "description": "The UID of the user who submitted it." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "The submission time." }
+      },
+      "required": ["courseId", "title", "type", "fileUrl", "status", "submittedBy", "createdAt"]
+    },
+    "User": {
+      "title": "User",
+      "description": "A registered user.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "description": "The user's email." },
+        "role": { "type": "string", "enum": ["student", "moderator", "admin"], "description": "The user's role." }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/faculties/{facultyId}": { "schema": "Faculty", "description": "Faculties collection." },
+    "/departments/{departmentId}": { "schema": "Department", "description": "Departments collection." },
+    "/courses/{courseId}": { "schema": "Course", "description": "Courses collection." },
+    "/question_papers/{paperId}": { "schema": "QuestionPaper", "description": "Question papers collection." },
+    "/syllabuses/{syllabusId}": { "schema": "Syllabus", "description": "Syllabuses collection." },
+    "/resources/{resourceId}": { "schema": "Resource", "description": "Resources collection." },
+    "/users/{userId}": { "schema": "User", "description": "Users collection." }
+  }
+}
